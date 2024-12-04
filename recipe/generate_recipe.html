@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Recipes by Ingredients</title>
+    <style>
+        body {
+            font-family: "Headland One", serif;
+            background-image: url('https://images.pexels.com/photos/616401/pexels-photo-616401.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');
+            background-size: cover;
+            background-position: center;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: black;
+        }
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(255,255,255, 0.8);
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Updated box shadow color to white */
+            color: black;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="number"],
+        select,
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .btn-custom {
+            width: 100%;
+            padding: 10px;
+            background-color: #FF6500;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn-custom:hover {
+            background-color: #002245;
+        }
+        .spinner {
+            display: none;
+            border: 8px solid rgba(0, 0, 0, 0.1);
+            border-top: 8px solid black; /* Changed spinner color to black */
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        p.error {
+            color: red;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Find Recipes by Ingredients</h1>
+    <div id="loadingSpinner" class="spinner"></div>
+    <form method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
+        {% csrf_token %}
+        
+        <!-- Ingredients (text-based) -->
+        <label for="ingredients">Ingredients (comma-separated):</label>
+        <input type="text" id="ingredients" name="ingredients" placeholder="e.g., apples,flour,sugar">
+
+        <!-- Image upload option -->
+        <label for="image">Upload a picture of the ingredients:</label>
+        <input type="file" id="image" name="image" accept="image/*">
+
+        <!-- Max Cooking Time -->
+        <label for="time">Max Cooking Time (minutes):</label>
+        <input type="number" id="time" name="time" min="1" placeholder="e.g., 30">
+
+        <!-- Servings -->
+        <label for="servings">Number of Servings:</label>
+        <input type="number" id="servings" name="servings" min="1" placeholder="e.g., 4">
+
+        <!-- Cuisine -->
+        <label for="cuisine">Cuisine Type:</label>
+        <input type="text" id="cuisine" name="cuisine" placeholder="e.g., Italian, Mexican">
+
+        <!-- Submit button -->
+        <button type="submit" class="btn-custom">Find Recipes</button>
+    </form>
+    
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <script>
+        function showSpinner() {
+            // Show the loading spinner
+            document.getElementById('loadingSpinner').style.display = 'block';
+        }
+
+        function validateForm() {
+            // Check if either ingredients or image is filled
+            var ingredients = document.getElementById('ingredients').value;
+            var image = document.getElementById('image').files.length;
+
+            if (!ingredients && !image) {
+                alert('Please provide either ingredients in text or upload an image of the ingredients.');
+                return false;
+            }
+
+            // Show spinner when the form is being submitted
+            showSpinner();
+            return true;
+        }
+    </script>
+</body>
+</html>

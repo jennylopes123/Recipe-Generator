@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generated Recipes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> <!-- Font Awesome Kit -->
+
+    <style>
+        body {
+            font-family: "Headland One", serif;
+            background-image: url('https://images.pexels.com/photos/164005/pexels-photo-164005.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');
+            background-size: cover;
+            background-position: center;
+            color: black;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin: 0;
+            padding-bottom: 20px;
+            font-size: 3rem;
+        }
+
+        .navbar {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            width: 100%;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        .navbar-brand, .navbar-nav .nav-link {
+            color: white;
+            font-size: 18px;
+        }
+
+        .navbar-brand:hover, .navbar-nav .nav-link:hover {
+            color: #FFD700;
+        }
+
+        .recipes-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .recipe-card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 450px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .recipe-card h2 {
+            font-size: 1.2rem;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .recipe-image img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .recipe-meta {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 1rem;
+        }
+
+        .recipe-meta p {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .tts-buttons {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+            color: white;
+            font-size: 1rem;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+    
+        .btn-success:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="#home">RecipeHub</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="{% url 'index' %}">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'generate_recipe' %}">Generate New Recipe</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Recipes Section -->
+<h1>Generated Recipes</h1>
+<div class="recipes-container">
+    {% for recipe in recipes %}
+        <div class="recipe-card">
+            <h2>{{ recipe.title }}</h2>
+            {% if recipe.image_url %}
+                <div class="recipe-image">
+                    <img src="{{ recipe.image_url }}" alt="Image of {{ recipe.title }}" />
+                </div>
+            {% else %}
+                <p>No image found for this recipe.</p>
+            {% endif %}
+            <div class="recipe-meta">
+                <p><i class="fa fa-utensils"></i>{{ recipe.cuisine }}</p>
+                <p><i class="fa fa-clock"></i>{{ recipe.time }} mins</p>
+                <p><i class="fa fa-users"></i>{{ recipe.servings }}</p>
+            </div>
+            <h2>Ingredients:</h2>
+            <ul>
+                {% for ingredient in recipe.ingredients %}
+                    <li>{{ ingredient|capfirst }}</li>
+                {% endfor %}
+            </ul>
+            <h2>Step-by-Step Instructions:</h2>
+            <ol>
+                {% for step in recipe.instructions %}
+                    <li>{{ step }}</li>
+                {% endfor %}
+            </ol>
+            <div class="tts-buttons">
+                <button class="btn btn-primary" onclick="speakRecipe('{{ recipe.title }}', {{ recipe.ingredients|safe }}, {{ recipe.instructions|safe }})">
+                    Speak Recipe
+                </button>
+                <button class="btn btn-danger" onclick="stopSpeaking()">
+                    Stop Speaking
+                </button>
+                <form method="POST" action="{% url 'save_recipe' recipe.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">
+                        Save Recipe
+                    </button>
+                </form>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<script>
+    // Function to start speaking the recipe
+    function speakRecipe(title, ingredients, instructions) {
+        let recipeText = `Here is the recipe for ${title}. Ingredients are: `;
+        ingredients.forEach(ingredient => {
+            recipeText += `${ingredient}, `;
+        });
+        recipeText += `Instructions are: `;
+        instructions.forEach((instruction, index) => {
+            recipeText += `Step ${index + 1}: ${instruction}. `;
+        });
+
+        // Create and configure speech synthesis
+        let utterance = new SpeechSynthesisUtterance(recipeText);
+        utterance.lang = 'en-US';
+        utterance.pitch = 1; // Adjust pitch
+        utterance.rate = 1;  // Adjust speed
+        window.speechSynthesis.speak(utterance);
+    }
+
+    // Function to stop speaking
+    function stopSpeaking() {
+        if (window.speechSynthesis.speaking) {
+            window.speechSynthesis.cancel();
+        }
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

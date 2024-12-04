@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Recipes</title>
+    <!-- Include Bootstrap CSS for styling -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">My Recipes</h2>
+        <!-- Check if there are any recipes -->
+        {% if recipes %}
+            <div class="row">
+                {% for recipe in recipes %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h3 class="card-title">{{ recipe.title }}</h3>
+                                <p class="card-text"><strong>Cuisine:</strong> {{ recipe.cuisine }}</p>
+                                <p class="card-text"><strong>Cooking Time:</strong> {{ recipe.time }} mins</p>
+                                <p class="card-text"><strong>Servings:</strong> {{ recipe.servings }}</p>
+                                <!-- Display recipe image -->
+                                {% if recipe.image_url %}
+                                    <img src="{{ recipe.image_url }}" alt="{{ recipe.title }}" class="img-fluid mb-3">
+                                {% else %}
+                                    <p>No image available</p>
+                                {% endif %}
+                                <a href="{{ recipe.image_url }}" target="_blank" class="btn btn-primary">View Image</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-center">No recipes found. Please generate some recipes first!</p>
+        {% endif %}
+    </div>
+    <!-- Include Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
